@@ -20,6 +20,8 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
   year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/RenaoYan/Build-Patch-for-Sdpc}}
+  howpublished = {\url{https://github.com/RenaoYan/Build-Patch-for-Sdpc}},
+  DOI = {10.5281/zenodo.7680204},
+  
 }
 ```
