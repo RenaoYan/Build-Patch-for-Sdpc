@@ -22,6 +22,6 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/RenaoYan/Build-Patch-for-Sdpc}},
   DOI = {10.5281/zenodo.7680204},
-  commit = {9bdaeee46a8989135ebb48d9695caf5abcbebe1c}
+  commit = {1c687e86447ae438eb723b1ecb3c04c4efd3b3f0}
 }
 ```
