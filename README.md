@@ -15,7 +15,7 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
 # Citing This Work:
 ```
 @misc{Yan2023,
-  author = {Renao, Yan and Yiqing, Liu and Qiehe, Sun and Jiawen, Li and Lianghui, Zhu},
+  author = {Renao, Yan and Yiqing, Liu and Qiehe, Sun and Jiawen, Li and Lianghui, Zhu and Qiming, He},
   title = {Build-Patch-for-Sdpc},
   year = {2023},
   publisher = {GitHub},
