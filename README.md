@@ -12,7 +12,7 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
 
 `pip install sdpc-linux` or download from [sdpc for linux (version 1.5)](https://pypi.org/project/sdpc-linux/#files)
 
-# How to use Sdpc library
+# Citing This Work:
 ```
 @misc{Yan2023,
   author = {Renao Yan, Yiqing Liu, Qiehe Sun, Jiawen Li, Lianghui Zhu},
