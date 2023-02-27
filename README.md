@@ -15,13 +15,11 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
 # Citing This Work:
 ```
 @misc{Yan2023,
-  author = {Renao Yan, Yiqing Liu, Qiehe Sun, Jiawen Li, Lianghui Zhu},
+  author = {Renao, Yan and Yiqing, Liu and Qiehe, Sun and Jiawen, Li and Lianghui, Zhu},
   title = {Build-Patch-for-Sdpc},
   year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/RenaoYan/Build-Patch-for-Sdpc}},
-  DOI = {10.5281/zenodo.7680300},
-  commit = {1c687e86447ae438eb723b1ecb3c04c4efd3b3f0}
+  howpublished = {\url{https://github.com/RenaoYan/Build-Patch-for-Sdpc}}
 }
 ```
