@@ -12,7 +12,10 @@ Two approaches (build with/ without .sdpl) to build patches are given for two di
 
 `pip install sdpc-linux` or download from [sdpc for linux (version 1.5)](https://pypi.org/project/sdpc-linux/#files)
 
-# Citing This Work:
+# Problems List
+If you found `Patch Saving Finished` occured before `Patch Reading Finished`, you could increase the block time from 10 up to 100 or even more in `img_dict = q.get(block=event.is_set(), timeout=10)`.
+
+# Citing This Work
 ```
 @misc{Yan2023,
   author = {Renao, Yan and Yiqing, Liu and Qiehe, Sun and Jiawen, Li and Lianghui, Zhu and Qiming, He},
