@@ -42,9 +42,9 @@ parser.add_argument('--overlap_w', type=int, default=0, help='overlap width of p
 parser.add_argument('--overlap_h', type=int, default=0, help='overlap height of patch')
 
 parser.add_argument('--thumbnail_level', type=int, default=2, choices=[1, 2, 3, 4],
-                    help='top level to catch WSI thumbnail images (larger is higher resolution).')
+                    help='top level to catch WSI thumbnail images (larger is higher resolution)')
 parser.add_argument('--use_otsu', action='store_false', help='use the Otsu algorithm to accelerate tiling patches or not')
-parser.add_argument('--blank_rate_th', type=float, default=0.95, help='cut patches with a blank rate lower than this threshold.')
+parser.add_argument('--blank_rate_th', type=float, default=0.95, help='cut patches with a blank rate lower than this threshold')
 parser.add_argument('--null_th', type=int, default=10, help='threshold to drop null patches (larger to drop more): 5, 10, 15, 20, ...')
 
 
