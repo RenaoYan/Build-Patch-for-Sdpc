@@ -21,12 +21,12 @@ parser.add_argument('--data_dir', type=str,
                     help='dir of slide files')
 parser.add_argument('--save_dir', type=str,
                     default='',
-                    help='path to save patches')
+                    help='dir of patch saving')
 
 # optional params.
 parser.add_argument('--annotation_dir', type=str,
                     default='',
-                    help='path of annotation files (optional)')
+                    help='dir of annotation files (optional)')
 parser.add_argument('--csv_path', type=str,
                     default=None,
                     help='path of csv file (optional)')
@@ -34,18 +34,18 @@ parser.add_argument('--csv_path', type=str,
 # general params. (we set the layer at the highest magnification as 40x if no magnification is provided in slide properties)
 parser.add_argument('--which2cut', type=str, default="magnification", choices=["magnification", "resolution"], 
                     help='use magnification or resolution to cut patches')
-parser.add_argument('--magnification', type=float, default=20, help='magnification to build patch: 5x, 20x, 40x, ...')
-parser.add_argument('--resolution', type=float, default=0.4, help='resolution to build patch: 0.103795, ... um/pixel')
-parser.add_argument('--patch_w', type=int, default=256, help='the width of patch')
-parser.add_argument('--patch_h', type=int, default=256, help='the height of patch')
-parser.add_argument('--overlap_w', type=int, default=0, help='the overlap width of patch')
-parser.add_argument('--overlap_h', type=int, default=0, help='the overlap height of patch')
+parser.add_argument('--magnification', type=float, default=20, help='magnification to cut patches: 5x, 20x, 40x, ...')
+parser.add_argument('--resolution', type=float, default=0.4, help='resolution to cut patches: 0.103795, ... (um/pixel)')
+parser.add_argument('--patch_w', type=int, default=256, help='width of patch')
+parser.add_argument('--patch_h', type=int, default=256, help='height of patch')
+parser.add_argument('--overlap_w', type=int, default=0, help='overlap width of patch')
+parser.add_argument('--overlap_h', type=int, default=0, help='overlap height of patch')
 
 parser.add_argument('--thumbnail_level', type=int, default=2, choices=[1, 2, 3, 4],
-                    help='the top level to catch thumbnail images from sdpc')
-parser.add_argument('--use_otsu', action='store_false', help='use otsu threshold or not')
-parser.add_argument('--blank_rate_th', type=float, default=0.95, help='cut patches with a lower blank rate')
-parser.add_argument('--null_th', type=int, default=10, help='the threshold to drop null patches (larger to drop more): 5, 10, 15, 20, ...')
+                    help='top level to catch WSI thumbnail images (larger is higher resolution).')
+parser.add_argument('--use_otsu', action='store_false', help='use the Otsu algorithm to accelerate tiling patches or not')
+parser.add_argument('--blank_rate_th', type=float, default=0.95, help='cut patches with a blank rate lower than this threshold.')
+parser.add_argument('--null_th', type=int, default=10, help='threshold to drop null patches (larger to drop more): 5, 10, 15, 20, ...')
 
 
 def get_bg_mask(thumbnail, kernel_size=5):
