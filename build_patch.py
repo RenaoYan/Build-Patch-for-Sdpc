@@ -27,6 +27,9 @@ parser.add_argument('--save_dir', type=str,
 parser.add_argument('--annotation_dir', type=str,
                     default='',
                     help='dir of annotation files (optional)')
+parser.add_argument('--color_annotation', 
+                    action='store_true', 
+                    help='use different color annotation (optional)')
 parser.add_argument('--csv_path', type=str,
                     default=None,
                     help='path of csv file (optional)')
@@ -94,9 +97,14 @@ def mag_transfer(slide, sdpc_path, magnification, resolution, patch_w, patch_h,
         else:
             scan_res = float(slide.properties["openslide.mpp-x"])
         zoomscale = scan_res / resolution
-    scan_mag_step = slide.level_downsamples[1] / slide.level_downsamples[0]
-    WSI_level = math.floor(math.log(1 / zoomscale, scan_mag_step))
-    zoomrate = slide.level_downsamples[WSI_level]
+    try:
+        scan_mag_step = slide.level_downsamples[1] / slide.level_downsamples[0]
+        WSI_level = math.floor(math.log(1 / zoomscale, scan_mag_step))
+        zoomrate = slide.level_downsamples[WSI_level]
+    except:
+        scan_mag_step = slide.level_downsample[1] / slide.level_downsample[0]
+        WSI_level = math.floor(math.log(1 / zoomscale, scan_mag_step))
+        zoomrate = slide.level_downsample[WSI_level]
     x_size = int(patch_w / zoomscale)
     y_size = int(patch_h / zoomscale)
     x_overlap = int(overlap_w / zoomscale)
@@ -153,7 +161,7 @@ class Slide2Patch():
         self.use_otsu = args.use_otsu
         self.blank_rate_th = args.blank_rate_th
 
-    def save_patch(self, data_path, coords=None):
+    def save_patch(self, data_path, coords=None, color_dirs=None):
         if data_path.split(".")[-1] == "sdpc":
             from sdpc.Sdpc import Sdpc
             slide = Sdpc(data_path)
@@ -183,6 +191,9 @@ class Slide2Patch():
         thumbnail_save_dir = os.path.join(self.save_dir, os.path.basename(data_path).split('.')[0], 'thumbnail')
         os.makedirs(thumbnail_save_dir, exist_ok=True)
         save_dir = os.path.join(self.save_dir, os.path.basename(data_path).split('.')[0])
+        if color_dirs is not None:
+            for color_dir in np.unique(color_dirs):
+                os.makedirs(os.path.join(save_dir, color_dir), exist_ok=True)
 
         if coords is None:
             coords = []
@@ -191,14 +202,18 @@ class Slide2Patch():
                     coords.append([i * x_step, j * y_step])
         pool = ThreadPoolExecutor(20)
         with tqdm(total=len(coords)) as pbar:
-            for coord in coords:
-                pool.submit(img_detect, save_dir, slide, coord, bg_mask, marked_img, WSI_level, slide_x, slide_y, self.patch_w, self.patch_h, 
+            for i, coord in enumerate(coords):
+                if color_dirs is None:
+                    _save_dir = save_dir
+                else:
+                    _save_dir = os.path.join(save_dir, color_dirs[i])
+                pool.submit(img_detect, _save_dir, slide, coord, bg_mask, marked_img, WSI_level, slide_x, slide_y, self.patch_w, self.patch_h, 
                             x_size, y_size, x_offset, y_offset, self.use_otsu, self.blank_rate_th, self.null_th)
                 pbar.update(1)
         pool.shutdown()
         Image.fromarray(marked_img).save(os.path.join(thumbnail_save_dir, 'thumbnail.png'))
     
-    def cut_with_annotation(self, annotation_dir, sdpc_path):
+    def cut_with_annotation(self, annotation_dir, sdpc_path, color_annotation):
         json_name = os.path.basename(sdpc_path).split(".")[0] + ".*"
         annotation_paths = glob.glob(os.path.join(annotation_dir, json_name))
         for annotation_path in annotation_paths:
@@ -206,14 +221,14 @@ class Slide2Patch():
                 print("processing {}!".format(annotation_path))
                 with open(annotation_path, 'r', encoding='UTF-8') as f:
                     label_dic = json.load(f)
-                    coords = self.getcoords(sdpc_path, label_dic=label_dic)
-                    self.save_patch(sdpc_path, coords)
+                    coords, colors = self.getcoords(sdpc_path, label_dic, color_annotation)
+                    self.save_patch(sdpc_path, coords, colors)
                 return None
 
         print("annotation of {} does not exist!".format(sdpc_path))
         return None
 
-    def getcoords(self, data_path, label_dic):
+    def getcoords(self, data_path, label_dic, color_annotation):
         if data_path.split(".")[-1] == "sdpc":
             from sdpc.Sdpc import Sdpc
             slide = Sdpc(data_path)
@@ -230,6 +245,7 @@ class Slide2Patch():
                                                                self.overlap_h,
                                                                self.which2cut)
         coords = []
+        colors = []
         if 'GroupModel' in label_dic.keys():
             counters = label_dic['GroupModel']['Labels']
         else:
@@ -240,6 +256,10 @@ class Slide2Patch():
             else:
                 counter_type = counter['LabelInfo']['ToolInfor']
             if counter_type == "btn_brush" or counter_type == "btn_pen":
+                if 'LineColor' in counter.keys():
+                    color = counter['LineColor']
+                else:
+                    color = counter['LabelInfo']['PenColor']
                 if 'Coordinates' in counter.keys():
                     Pointsx = [int(point.get('X')) for point in counter['Coordinates']]
                     Pointsy = [int(point.get('Y')) for point in counter['Coordinates']]
@@ -251,8 +271,8 @@ class Slide2Patch():
                     Pointsx = []
                     Pointsy = []
                     for i in range(len(Points[0])):
-                        Pointsx.append(int((Points[0][i] + Ref_x) / std_scale) - Ref_x)
-                        Pointsy.append(int((Points[1][i] + Ref_y) / std_scale) - Ref_y)
+                        Pointsx.append(int((Points[0][i] + Ref_x) / std_scale))
+                        Pointsy.append(int((Points[1][i] + Ref_y) / std_scale))
                 SPA_x, SPA_y = (min(Pointsx), min(Pointsy))
                 SPB_x, SPB_y = (max(Pointsx), max(Pointsy))
                 Pointslist = np.array([Pointsx, Pointsy]).transpose(1, 0)
@@ -267,10 +287,10 @@ class Slide2Patch():
                 for x in range(int(start_kx), int(end_kx) + 1):
                     for y in range(int(start_ky), int(end_ky) + 1):
                         test_x_left = int(x0 + x * x_step - x_size / 2)
-                        test_y_bottom = int(y0 + y * x_step - y_size / 2)
+                        test_y_bottom = int(y0 + y * y_step - y_size / 2)
                         test_x_right = int(x0 + x * x_step + x_size / 2)
-                        test_y_top = int(y0 + y * x_step + y_size / 2)
-                        test_list = [(x0 + x * x_step, y0 + y * x_step),
+                        test_y_top = int(y0 + y * y_step + y_size / 2)
+                        test_list = [(x0 + x * x_step, y0 + y * y_step),
                                      (test_x_left, test_y_top), 
                                      (test_x_left, test_y_bottom), 
                                      (test_x_right, test_y_top), 
@@ -278,8 +298,12 @@ class Slide2Patch():
                         for test_point in test_list:
                             if cv2.pointPolygonTest(Pointslist, test_point, False) >= 0:
                                 coords.append([test_x_left, test_y_bottom])
+                                colors.append(color)
                                 continue
-        return coords
+        if color_annotation:
+            return coords, colors
+        else:
+            return coords, None
 
 
 if __name__ == '__main__':    
@@ -315,7 +339,7 @@ if __name__ == '__main__':
         print('----------* {}/{} Processing: {} *----------'.format(i + 1, len(_files), file))
         time_start = time.time()
         if os.path.exists(args.annotation_dir):
-            Auto_Build.cut_with_annotation(args.annotation_dir, file)
+            Auto_Build.cut_with_annotation(args.annotation_dir, file, args.color_annotation)
         else:
             Auto_Build.save_patch(file)
 
